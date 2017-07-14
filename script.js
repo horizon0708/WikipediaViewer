@@ -34,11 +34,12 @@ class SearchInput extends React.Component {
         super();
         this.state = {
             query: "",
-            result: undefined,
+            result: ""
         }
     }
 
     handleChange(e) {
+        let y = e.target.value;
         this.setState({ query: e.target.value },
             () => {
                 $.ajax({
@@ -46,10 +47,14 @@ class SearchInput extends React.Component {
                     data: { action: 'query', list: 'search', srsearch: this.state.query, format: 'json' },
                     dataType: 'jsonp',
                     success: (x) => {
-                        this.setState({ result: x.query });
+                        if (this.state.query == ""){
+                            this.setState({result: ""});
+                        }
+                        if (this.state.query == y) { // without this, typing too fast may make wrong result come up due to async loading of results.
+                            this.setState({result: x.query});
+                        }
                     }
                 });
-
             });
     }
 
@@ -66,14 +71,20 @@ class SearchInput extends React.Component {
         return <div id="container">
 
             <div className="row">
-                <div className="col m8 offset-m2 s12 card-panel search-box">
-                    <div className="row">
-                        <input className="col m8 offset-m2 s8 offset-s2" onChange={(e) => this.handleChange(e)} value={this.state.query} placeholder="Start Typing Here!" />
-                        <i className="material-icons col m1 s1">shuffle</i>
+                <div className="col l6 m8 s12 offset-m2 offset-l3">
+                    <div className="col s12">
+                        <div className="card white">
+                            <div className ="card-content">
+                                <div className="row">
+                                    <input className="col s8 offset-s2" onChange={(e) => this.handleChange(e)} value={this.state.query} placeholder="Start Typing Here!" />
+                                    <a href="https://en.wikipedia.org/wiki/Special:Random" target="_blank"><i className="material-icons col m1 s1">shuffle</i></a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="col m8 offset-m2">
-                    {this.getResultList()}
+                    <div className="col s12">
+                        {this.getResultList()}
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,14 +99,14 @@ class SearchResult extends React.Component {
 
     render() {
         return <a href={"https://en.wikipedia.org/wiki/" + this.props.query.title} target="_blank">
-            `       <div className="col s12 m12">
+
                         <div className="card white">
                             <div className="card-content">
                                 <span className="card-title">{this.props.query.title}</span>
                                 <span className="search-snippet" dangerouslySetInnerHTML={this.createMarkup(this.props.query.snippet)}></span>
                             </div>
                         </div>
-                    </div></a>
+                   </a>
     }
 }
 
